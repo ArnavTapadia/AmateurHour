@@ -1,5 +1,11 @@
 import streamlit as st
+import openai
 import os
+from dotenv import load_dotenv
+
+# --- Load environment variables ---
+load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # --- PAGE CONFIG ---
 st.set_page_config(
@@ -31,7 +37,6 @@ st.markdown(
 with st.sidebar:
     st.title("🏆 AI Badminton Coach")
     st.subheader("⚙️ Settings")
-    openai_api_key = st.text_input("🔑 OpenAI API Key", type="password")
     st.write("🔹 AI-powered badminton game analysis")
     st.markdown("---")
     st.write("🛠 Developed for **Cornell AI Hackathon 2025**")
@@ -67,13 +72,26 @@ st.markdown(
 )
 
 user_query = st.text_area("Type your question below:", "")
+
+# --- FUNCTION TO CALL SONNET 3.5 ---
+def get_sonnet_response(api_key, query):
+    client = openai.OpenAI(api_key=api_key, base_url="https://api.ai.it.cornell.edu")
+    try:
+        response = client.chat.completions.create(
+            model="anthropic.claude-3.5-sonnet.v2",  # Sonnet 3.5 model
+            messages=[{"role": "user", "content": query}]
+        )
+        return response.choices[0].message.content  # ✅ FIXED: Access content correctly
+    except Exception as e:
+        return f"⚠️ Error: {e}"
+
+# --- PROCESS USER QUERY ---
 if st.button("⚡ Get AI Feedback"):
-    if not openai_api_key.startswith("sk-"):
-        st.warning("⚠️ Please enter a valid OpenAI API key!", icon="⚠")
+    if not openai_api_key:
+        st.warning("⚠️ Missing API Key! Please check your `.env` file.", icon="⚠")
     else:
         with st.spinner("🔍 Analyzing your performance..."):
-            model = ChatOpenAI(temperature=0.7, api_key=openai_api_key)
-            response = model.invoke(user_query)
+            response = get_sonnet_response(openai_api_key, user_query)
             st.success("✅ AI Analysis Complete!")
             st.markdown("### **📝 AI Feedback:**")
             st.info(response)
