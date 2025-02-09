@@ -1,12 +1,17 @@
 import streamlit as st
 import openai
 import os
-import base64
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import SystemMessage, HumanMessage
 from langchain.prompts import ChatPromptTemplate
 
+# --- Load environment variables ---
+load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
+
+# --- Image Directory and Files ---
+SMASH_IMAGE_FOLDER = "streamlit-app/smashhitphotos"
 smash_descriptions = {
     "frontsmashview.png": {
         "title": "Jump Smash Preparation",
@@ -17,7 +22,8 @@ smash_descriptions = {
             "The elbow is positioned correctly behind the body, allowing for a full extension during the smash. "
             "The torso rotation generates more power, transferring energy from the core to the racket. "
             "The player has jumped, allowing for a steep downward smash trajectory, which makes the shot harder to return."
-        )
+        ),
+        "url": "https://example.com/frontsmashview.png"  # Replace with your actual image URL
     },
     "sidesmashview.png": {
         "title": "Smash Execution",
@@ -28,7 +34,8 @@ smash_descriptions = {
             "The full-body rotation increases power and speed. "
             "The player’s feet are still off the ground, meaning the smash will have a steep angle, making it harder for the opponent to defend. "
             "His non-racket arm is tucked in, maintaining balance and preventing excess movement."
-        )
+        ),
+        "url": "https://example.com/sidesmashview.png"  # Replace with your actual image URL
     },
     "smashexecution.png": {
         "title": "Follow-Through and Power Transfer",
@@ -39,35 +46,10 @@ smash_descriptions = {
             "The wrist snap adds extra speed to the smash, increasing its effectiveness. "
             "The forward body movement ensures momentum is transferred into the shot. "
             "The positioning of his arm and body suggests that he is ready to recover quickly after the shot."
-        )
+        ),
+        "url": "https://example.com/smashexecution.png"  # Replace with your actual image URL
     }
 }
-
-
-# --- Load environment variables ---
-load_dotenv()
-openai_api_key = os.getenv("OPENAI_API_KEY")
-
-# --- Image Directory and Files ---
-SMASH_IMAGE_FOLDER = "streamlit-app/smashhitphotos"
-SMASH_IMAGES = [
-    {
-        "path": os.path.join(SMASH_IMAGE_FOLDER, filename),
-        "title": smash_descriptions[filename]["title"],
-        "description": smash_descriptions[filename]["description"]
-    }
-    for filename in smash_descriptions.keys()
-]
-
-# --- Function to Convert Local Image to Base64 ---
-def encode_image_to_base64(image_path):
-    """Encodes an image file to a Base64 string for AI model input."""
-    with open(image_path, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode("utf-8")
-
-# --- Convert Images to Base64 ---
-for img in SMASH_IMAGES:
-    img["base64"] = encode_image_to_base64(img["path"])
 
 # --- System Prompt Introduction (Hidden from User) ---
 SYSTEM_PROMPT_INTRO = """
@@ -82,21 +64,19 @@ llm = ChatOpenAI(model="anthropic.claude-3.5-sonnet.v2", base_url="https://api.a
 
 # --- Function to Analyze User's Smash Pose ---
 def analyze_smash_pose(user_query, user_image):
-    """Analyzes the user's uploaded smash pose using hidden system context with images."""
-
-    # Create a structured system prompt with multimodal support
+    """Analyzes the user's uploaded smash pose using hidden system context with image descriptions."""
+    # Prepare the system messages
     system_messages = [SystemMessage(content=SYSTEM_PROMPT_INTRO)]
+    
+    # Add professional smash descriptions and image URLs
+    for filename, details in smash_descriptions.items():
+        system_messages.append(SystemMessage(content=f"**{details['title']}**: {details['description']}"))
+        system_messages.append(SystemMessage(content=f"Image URL: {details['url']}"))
 
-    # Add professional smash images and descriptions (Base64 encoded)
-    for img in SMASH_IMAGES:
-        system_messages.append(SystemMessage(content={"type": "image", "image": img["base64"]}))  # Base64 image
-        system_messages.append(SystemMessage(content=f"**{img['title']}**: {img['description']}"))
-
-    # Add user's uploaded image for AI analysis (Convert user image to Base64)
-    user_image_base64 = encode_image_to_base64(user_image)
-
+    # Add user's uploaded image for AI analysis
     system_messages.append(HumanMessage(content="Here is the user's smash pose for analysis:"))
-    system_messages.append(HumanMessage(content={"type": "image", "image": user_image_base64}))
+    user_image_url = "https://example.com/uploaded_user_image.png"  # Replace with actual hosted image URL
+    system_messages.append(HumanMessage(content=f"Image URL: {user_image_url}"))
 
     # Create the prompt template
     system_prompt = ChatPromptTemplate.from_messages(system_messages)
