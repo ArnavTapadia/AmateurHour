@@ -22,7 +22,7 @@ smash_descriptions = {
             "The torso rotation generates more power, transferring energy from the core to the racket. "
             "The player has jumped, allowing for a steep downward smash trajectory, which makes the shot harder to return."
         ),
-        "url": "https://github.com/ArnavTapadia/AmateurHour/blob/a2fd8c92af4ddfff4b2b2172ac0231c95992dd69/streamlit-app/smashhitphotos/frontsmashview.png"  # Replace with your actual image URL
+        "url": "https://example.com/frontsmashview.png"
     },
     "sidesmashview.png": {
         "title": "Smash Execution",
@@ -34,7 +34,7 @@ smash_descriptions = {
             "The player’s feet are still off the ground, meaning the smash will have a steep angle, making it harder for the opponent to defend. "
             "His non-racket arm is tucked in, maintaining balance and preventing excess movement."
         ),
-        "url": "https://github.com/ArnavTapadia/AmateurHour/blob/a2fd8c92af4ddfff4b2b2172ac0231c95992dd69/streamlit-app/smashhitphotos/sidesmashview.png"  # Replace with your actual image URL
+        "url": "https://example.com/sidesmashview.png"
     },
     "smashexecution.png": {
         "title": "Follow-Through and Power Transfer",
@@ -46,7 +46,7 @@ smash_descriptions = {
             "The forward body movement ensures momentum is transferred into the shot. "
             "The positioning of his arm and body suggests that he is ready to recover quickly after the shot."
         ),
-        "url": "https://github.com/ArnavTapadia/AmateurHour/blob/a2fd8c92af4ddfff4b2b2172ac0231c95992dd69/streamlit-app/smashhitphotos/smashexecution.png"  # Replace with your actual image URL
+        "url": "https://example.com/smashexecution.png"
     }
 }
 
@@ -64,24 +64,18 @@ llm = ChatOpenAI(model="anthropic.claude-3.5-sonnet.v2", base_url="https://api.a
 # --- Function to Analyze User's Smash Pose ---
 def analyze_smash_pose(user_query, user_image_url):
     """Analyzes the user's uploaded smash pose using hidden system context with image descriptions."""
-    # Prepare the system messages
     system_messages = [SystemMessage(content=SYSTEM_PROMPT_INTRO)]
     
-    # Add professional smash descriptions and image URLs
     for filename, details in smash_descriptions.items():
         system_messages.append(SystemMessage(content=f"**{details['title']}**: {details['description']}"))
         system_messages.append(SystemMessage(content=f"Image URL: {details['url']}"))
 
-    # Add user's uploaded image for AI analysis
     system_messages.append(HumanMessage(content="Here is the user's smash pose for analysis:"))
     system_messages.append(HumanMessage(content=f"Image URL: {user_image_url}"))
-
-    # Create the prompt template
+    print('HELLO')
+    print(system_messages)
     system_prompt = ChatPromptTemplate.from_messages(system_messages)
-
-    # Get AI response
     response = llm(system_prompt)
-
     return response.content
 
 # --- Streamlit Web App ---
@@ -90,9 +84,11 @@ st.set_page_config(page_title="🏸 AI Badminton Coach", page_icon="🏆", layou
 st.title("🏸 AI Badminton Coach - Smash Pose Analysis")
 st.markdown("### Upload your badminton smash pose and get expert AI feedback!")
 
-# --- User Upload Section ---
-st.subheader("📸 Upload Your Smash Pose")
+# --- User Upload or URL Input Section ---
+st.subheader("📸 Upload Your Smash Pose or Provide an Image URL")
+
 user_uploaded_image = st.file_uploader("Upload an image of your smash", type=["jpg", "png", "jpeg"])
+user_image_url_input = st.text_input("Or enter an image URL:")
 
 # --- User Input Question ---
 user_query = st.text_area("Ask about your smash technique:", "How can I improve my smash?")
@@ -101,23 +97,22 @@ user_query = st.text_area("Ask about your smash technique:", "How can I improve 
 if st.button("⚡ Get AI Analysis"):
     if not openai_api_key:
         st.warning("⚠️ Missing API Key! Please check your `.env` file.", icon="⚠")
-    elif not user_uploaded_image:
-        st.warning("⚠️ Please upload an image of your smash.", icon="⚠")
+    elif not user_uploaded_image and not user_image_url_input:
+        st.warning("⚠️ Please upload an image or provide an image URL.", icon="⚠")
     else:
         with st.spinner("🔍 Analyzing your technique..."):
-            # Simulate hosting the user-uploaded image by saving it temporarily
-            user_temp_path = "temp_user_smash.png"
-            with open(user_temp_path, "wb") as f:
-                f.write(user_uploaded_image.getbuffer())
-
-            # Simulate an image URL for user-uploaded image (replace this with an actual hosting service)
-            user_image_url = "https://example.com/uploaded_user_image.png"  # Replace with hosted URL
-
-            # Analyze the image
+            if user_image_url_input:
+                user_image_url = user_image_url_input
+            else:
+                user_temp_path = "temp_user_smash.png"
+                with open(user_temp_path, "wb") as f:
+                    f.write(user_uploaded_image.getbuffer())
+                user_image_url = "https://example.com/uploaded_user_image.png"  # Replace with hosted URL
+            
             response = analyze_smash_pose(user_query, user_image_url)
             st.success("✅ AI Analysis Complete!")
             st.markdown("### **📝 AI Feedback:**")
             st.info(response)
-
-            # Cleanup temp file
-            os.remove(user_temp_path)
+            
+            if not user_image_url_input:
+                os.remove(user_temp_path)
