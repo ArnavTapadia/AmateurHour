@@ -22,7 +22,7 @@ smash_descriptions = {
             "The torso rotation generates more power, transferring energy from the core to the racket. "
             "The player has jumped, allowing for a steep downward smash trajectory, which makes the shot harder to return."
         ),
-        "url": "https://example.com/frontsmashview.png"  # Replace with your actual image URL
+        "url": "https://github.com/ArnavTapadia/AmateurHour/blob/a2fd8c92af4ddfff4b2b2172ac0231c95992dd69/streamlit-app/smashhitphotos/frontsmashview.png"  # Replace with your actual image URL
     },
     "sidesmashview.png": {
         "title": "Smash Execution",
@@ -34,7 +34,7 @@ smash_descriptions = {
             "The player’s feet are still off the ground, meaning the smash will have a steep angle, making it harder for the opponent to defend. "
             "His non-racket arm is tucked in, maintaining balance and preventing excess movement."
         ),
-        "url": "https://example.com/sidesmashview.png"  # Replace with your actual image URL
+        "url": "https://github.com/ArnavTapadia/AmateurHour/blob/a2fd8c92af4ddfff4b2b2172ac0231c95992dd69/streamlit-app/smashhitphotos/sidesmashview.png"  # Replace with your actual image URL
     },
     "smashexecution.png": {
         "title": "Follow-Through and Power Transfer",
@@ -46,7 +46,7 @@ smash_descriptions = {
             "The forward body movement ensures momentum is transferred into the shot. "
             "The positioning of his arm and body suggests that he is ready to recover quickly after the shot."
         ),
-        "url": "https://example.com/smashexecution.png"  # Replace with your actual image URL
+        "url": "https://github.com/ArnavTapadia/AmateurHour/blob/a2fd8c92af4ddfff4b2b2172ac0231c95992dd69/streamlit-app/smashhitphotos/smashexecution.png"  # Replace with your actual image URL
     }
 }
 
