@@ -11,7 +11,6 @@ load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # --- Image Directory and Files ---
-SMASH_IMAGE_FOLDER = "streamlit-app/smashhitphotos"
 smash_descriptions = {
     "frontsmashview.png": {
         "title": "Jump Smash Preparation",
@@ -63,7 +62,7 @@ Here are three professional smash examples with key descriptions:
 llm = ChatOpenAI(model="anthropic.claude-3.5-sonnet.v2", base_url="https://api.ai.it.cornell.edu")
 
 # --- Function to Analyze User's Smash Pose ---
-def analyze_smash_pose(user_query, user_image):
+def analyze_smash_pose(user_query, user_image_url):
     """Analyzes the user's uploaded smash pose using hidden system context with image descriptions."""
     # Prepare the system messages
     system_messages = [SystemMessage(content=SYSTEM_PROMPT_INTRO)]
@@ -75,7 +74,6 @@ def analyze_smash_pose(user_query, user_image):
 
     # Add user's uploaded image for AI analysis
     system_messages.append(HumanMessage(content="Here is the user's smash pose for analysis:"))
-    user_image_url = "https://example.com/uploaded_user_image.png"  # Replace with actual hosted image URL
     system_messages.append(HumanMessage(content=f"Image URL: {user_image_url}"))
 
     # Create the prompt template
@@ -107,13 +105,16 @@ if st.button("⚡ Get AI Analysis"):
         st.warning("⚠️ Please upload an image of your smash.", icon="⚠")
     else:
         with st.spinner("🔍 Analyzing your technique..."):
-            # Save user-uploaded image temporarily
+            # Simulate hosting the user-uploaded image by saving it temporarily
             user_temp_path = "temp_user_smash.png"
             with open(user_temp_path, "wb") as f:
                 f.write(user_uploaded_image.getbuffer())
 
+            # Simulate an image URL for user-uploaded image (replace this with an actual hosting service)
+            user_image_url = "https://example.com/uploaded_user_image.png"  # Replace with hosted URL
+
             # Analyze the image
-            response = analyze_smash_pose(user_query, user_temp_path)
+            response = analyze_smash_pose(user_query, user_image_url)
             st.success("✅ AI Analysis Complete!")
             st.markdown("### **📝 AI Feedback:**")
             st.info(response)
